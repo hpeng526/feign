@@ -30,6 +30,9 @@ import static feign.FeignException.errorReading;
 import static feign.Util.checkNotNull;
 import static feign.Util.ensureClosed;
 
+/**
+ * 实际上feign的调用是在这个类处理的
+ */
 final class SynchronousMethodHandler implements MethodHandler {
 
   private static final long MAX_RESPONSE_BUFFER_SIZE = 8192L;
@@ -67,6 +70,9 @@ final class SynchronousMethodHandler implements MethodHandler {
     this.decode404 = decode404;
   }
 
+  /**
+   *  实际的动态代理调用方法
+   */
   @Override
   public Object invoke(Object[] argv) throws Throwable {
     RequestTemplate template = buildTemplateFromArgs.create(argv);
@@ -85,6 +91,7 @@ final class SynchronousMethodHandler implements MethodHandler {
   }
 
   Object executeAndDecode(RequestTemplate template) throws Throwable {
+    // 生成请求对象
     Request request = targetRequest(template);
 
     if (logLevel != Logger.Level.NONE) {
@@ -154,9 +161,11 @@ final class SynchronousMethodHandler implements MethodHandler {
   }
 
   Request targetRequest(RequestTemplate template) {
+    // 设置一个或者多个 interceptor
     for (RequestInterceptor interceptor : requestInterceptors) {
       interceptor.apply(template);
     }
+    // RequestTemplate is mutable, so needs to be guarded with the copy constructor.
     return target.apply(new RequestTemplate(template));
   }
 
@@ -170,6 +179,7 @@ final class SynchronousMethodHandler implements MethodHandler {
     }
   }
 
+  // synchronousMethodHandlerFactory
   static class Factory {
 
     private final Client client;
@@ -192,6 +202,7 @@ final class SynchronousMethodHandler implements MethodHandler {
     public MethodHandler create(Target<?> target, MethodMetadata md,
                                 RequestTemplate.Factory buildTemplateFromArgs,
                                 Options options, Decoder decoder, ErrorDecoder errorDecoder) {
+      // create 方法就返回 SynchronousMethodHandler
       return new SynchronousMethodHandler(target, client, retryer, requestInterceptors, logger,
                                           logLevel, md, buildTemplateFromArgs, options, decoder,
                                           errorDecoder, decode404);

@@ -214,14 +214,21 @@ public abstract class Feign {
       return target(new HardCodedTarget<T>(apiType, url));
     }
 
+    /**
+     * 主要是调用这个方法, target 包装了build 的 newInstance
+     * build() 方法返回的是 ReflectiveFeign
+     * 实际执行的是 ReflectiveFeign#newInstance
+     */
     public <T> T target(Target<T> target) {
       return build().newInstance(target);
     }
 
     public Feign build() {
+      // build 的时候 初始化了
       SynchronousMethodHandler.Factory synchronousMethodHandlerFactory =
           new SynchronousMethodHandler.Factory(client, retryer, requestInterceptors, logger,
                                                logLevel, decode404);
+      // 设置 synchronousMethodHandlerFactory
       ParseHandlersByName handlersByName =
           new ParseHandlersByName(contract, options, encoder, decoder,
                                   errorDecoder, synchronousMethodHandlerFactory);

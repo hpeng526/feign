@@ -253,6 +253,7 @@ public final class RequestTemplate implements Serializable {
   }
 
   /* roughly analogous to {@code javax.ws.rs.client.Target.request()}. */
+  // 实际调用方法
   public Request request() {
     Map<String, Collection<String>> safeCopy = new LinkedHashMap<String, Collection<String>>();
     safeCopy.putAll(headers);

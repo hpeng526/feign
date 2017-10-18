@@ -55,6 +55,9 @@ public interface Client {
    */
   Response execute(Request request, Options options) throws IOException;
 
+  /**
+   * 默认的client是使用 java.net 里的 HttpURLConnection 提供的调用实现
+   */
   public static class Default implements Client {
 
     private final SSLSocketFactory sslContextFactory;

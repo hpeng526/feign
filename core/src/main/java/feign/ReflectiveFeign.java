@@ -58,6 +58,7 @@ public class ReflectiveFeign extends Feign {
       if (method.getDeclaringClass() == Object.class) {
         continue;
       } else if(Util.isDefault(method)) {
+        // 额外处理默认方法
         DefaultMethodHandler handler = new DefaultMethodHandler(method);
         defaultMethodHandlers.add(handler);
         methodToHandler.put(method, handler);
@@ -65,7 +66,9 @@ public class ReflectiveFeign extends Feign {
         methodToHandler.put(method, nameToHandler.get(Feign.configKey(target.type(), method)));
       }
     }
+    // 这里的 factory#create 实际是 synchronousMethodHandlerFactory#create
     InvocationHandler handler = factory.create(target, methodToHandler);
+    // 使用 Java 动态代理, 代理方法在 synchronousMethodHandlerFactory
     T proxy = (T) Proxy.newProxyInstance(target.type().getClassLoader(), new Class<?>[]{target.type()}, handler);
 
     for(DefaultMethodHandler defaultMethodHandler : defaultMethodHandlers) {
@@ -74,6 +77,9 @@ public class ReflectiveFeign extends Feign {
     return proxy;
   }
 
+  /**
+   * 默认的 InvocationHandler
+   */
   static class FeignInvocationHandler implements InvocationHandler {
 
     private final Target target;
